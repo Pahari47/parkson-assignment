@@ -8,6 +8,7 @@ export default function TransactionForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [transaction, setTransaction] = useState({
     transaction_type: "IN",
     transaction_date: new Date().toISOString().split('T')[0],
@@ -34,11 +35,38 @@ export default function TransactionForm() {
 
   const loadProducts = async () => {
     try {
+      setError("");
+      setProductsLoading(true);
       const data = await getProducts({ is_active: true });
-      setProducts(data);
+      
+      console.log('TransactionForm received products data:', data);
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else if (data && Array.isArray(data.results)) {
+        // Handle paginated response
+        setProducts(data.results);
+      } else if (data && typeof data === 'object') {
+        // Handle case where API returns an object with data
+        console.error('Unexpected products data format:', data);
+        setProducts([]);
+        setError("Invalid products data format received from server");
+      } else {
+        console.error('Unexpected products data format:', data);
+        setProducts([]);
+        setError("Invalid products data format received from server");
+      }
     } catch (err) {
-      setError("Failed to load products");
-      console.error(err);
+      console.error('Error loading products:', err);
+      setProducts([]);
+      if (err.message) {
+        setError(`Failed to load products: ${err.message}`);
+      } else {
+        setError("Failed to load products. Please try again.");
+      }
+    } finally {
+      setProductsLoading(false);
     }
   };
 
@@ -111,6 +139,17 @@ export default function TransactionForm() {
   };
 
   if (loading) return <div className="text-center mt-8">Loading...</div>;
+  if (error) return (
+    <div className="text-center mt-8">
+      <div className="text-red-500 mb-4">{error}</div>
+      <button
+        onClick={loadProducts}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        Retry
+      </button>
+    </div>
+  );
 
   return (
     <div className="max-w-4xl mx-auto mt-8 p-6">
@@ -228,11 +267,17 @@ export default function TransactionForm() {
                     required
                   >
                     <option value="">Select Product</option>
-                    {products.map(product => (
-                      <option key={product.product_id} value={product.product_id}>
-                        {product.product_name} ({product.product_code})
-                      </option>
-                    ))}
+                    {productsLoading ? (
+                      <option value="" disabled>Loading products...</option>
+                    ) : Array.isArray(products) && products.length > 0 ? (
+                      products.map(product => (
+                        <option key={product.product_id} value={product.product_id}>
+                          {product.product_name} ({product.product_code})
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>No products available</option>
+                    )}
                   </select>
                 </div>
 

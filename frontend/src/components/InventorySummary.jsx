@@ -20,11 +20,35 @@ export default function InventorySummary() {
   const loadInventory = async () => {
     try {
       setLoading(true);
+      setError("");
       const data = await getInventorySummary(filters);
-      setInventory(data);
+      
+      console.log('InventorySummary received data:', data);
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setInventory(data);
+      } else if (data && Array.isArray(data.results)) {
+        // Handle paginated response
+        setInventory(data.results);
+      } else if (data && typeof data === 'object') {
+        // Handle case where API returns an object with data
+        console.error('Unexpected data format:', data);
+        setInventory([]);
+        setError("Invalid data format received from server");
+      } else {
+        console.error('Unexpected data format:', data);
+        setInventory([]);
+        setError("Invalid data format received from server");
+      }
     } catch (err) {
-      setError("Failed to load inventory summary");
-      console.error(err);
+      console.error('Error loading inventory:', err);
+      setInventory([]);
+      if (err.message) {
+        setError(`Failed to load inventory: ${err.message}`);
+      } else {
+        setError("Failed to load inventory. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -41,7 +65,20 @@ export default function InventorySummary() {
   };
 
   if (loading) return <div className="text-center mt-8">Loading inventory...</div>;
-  if (error) return <div className="text-red-500 text-center mt-8">{error}</div>;
+  if (error) return (
+    <div className="text-center mt-8">
+      <div className="text-red-500 mb-4">{error}</div>
+      <button
+        onClick={loadInventory}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        Retry
+      </button>
+    </div>
+  );
+  
+  // Ensure inventory is always an array
+  const inventoryArray = Array.isArray(inventory) ? inventory : [];
 
   return (
     <div className="max-w-6xl mx-auto mt-8 p-6">
@@ -124,7 +161,20 @@ export default function InventorySummary() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {inventory.map((item) => (
+            {inventoryArray.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
+                  <div className="flex flex-col items-center">
+                    <svg className="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <p className="text-lg font-medium">No inventory items found</p>
+                    <p className="text-sm">Try adjusting your filters or add some products.</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              inventoryArray.map((item) => (
               <tr key={item.product_id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
@@ -173,7 +223,8 @@ export default function InventorySummary() {
                   </div>
                 </td>
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
       </div>

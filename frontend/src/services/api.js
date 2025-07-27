@@ -11,11 +11,17 @@ export async function apiFetch(endpoint, options = {}) {
     ...options.headers,
   };
   
-  try {
-    const res = await fetch(getApiUrl(endpoint), { ...options, headers });
-    
-    // If token is expired, try to refresh it
-    if (res.status === 401 && token) {
+  const fullUrl = getApiUrl(endpoint);
+  console.log('API Fetch:', fullUrl, { ...options, headers });
+  
+      try {
+      const res = await fetch(fullUrl, { ...options, headers });
+      
+      console.log('API Response Status:', res.status, res.statusText);
+      console.log('API Response Headers:', Object.fromEntries(res.headers.entries()));
+      
+      // If token is expired, try to refresh it
+      if (res.status === 401 && token) {
       const refreshed = await refreshToken();
       if (refreshed) {
         // Retry the original request with new token
@@ -26,19 +32,23 @@ export async function apiFetch(endpoint, options = {}) {
           ...options.headers,
         };
         const retryRes = await fetch(getApiUrl(endpoint), { ...options, headers: newHeaders });
-        if (!retryRes.ok) {
-          const error = await retryRes.json().catch(() => ({}));
-          throw error;
-        }
-        return retryRes.json();
+                        if (!retryRes.ok) {
+                  const error = await retryRes.json().catch(() => ({}));
+                  throw error;
+                }
+                const retryData = await retryRes.json();
+                console.log('API Retry Response Data:', retryData);
+                return retryData;
       }
     }
     
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw error;
-    }
-    return res.json();
+                    if (!res.ok) {
+                  const error = await res.json().catch(() => ({}));
+                  throw error;
+                }
+                const data = await res.json();
+                console.log('API Response Data:', data);
+                return data;
   } catch (error) {
     throw error;
   }

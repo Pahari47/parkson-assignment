@@ -11,7 +11,14 @@ export async function getTransactions(params = {}) {
   const queryString = queryParams.toString();
   const endpoint = queryString ? `${config.ENDPOINTS.TRANSACTIONS}?${queryString}` : config.ENDPOINTS.TRANSACTIONS;
   
-  return apiFetch(endpoint);
+  try {
+    const data = await apiFetch(endpoint);
+    console.log('Transactions API response:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching transactions:', error);
+    throw error;
+  }
 }
 
 export async function getTransaction(id) {

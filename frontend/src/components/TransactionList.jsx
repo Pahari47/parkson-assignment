@@ -19,11 +19,35 @@ export default function TransactionList() {
   const loadTransactions = async () => {
     try {
       setLoading(true);
+      setError("");
       const data = await getTransactions(filters);
-      setTransactions(data);
+      
+      console.log('TransactionList received data:', data);
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setTransactions(data);
+      } else if (data && Array.isArray(data.results)) {
+        // Handle paginated response
+        setTransactions(data.results);
+      } else if (data && typeof data === 'object') {
+        // Handle case where API returns an object with data
+        console.error('Unexpected data format:', data);
+        setTransactions([]);
+        setError("Invalid data format received from server");
+      } else {
+        console.error('Unexpected data format:', data);
+        setTransactions([]);
+        setError("Invalid data format received from server");
+      }
     } catch (err) {
-      setError("Failed to load transactions");
-      console.error(err);
+      console.error('Error loading transactions:', err);
+      setTransactions([]);
+      if (err.message) {
+        setError(`Failed to load transactions: ${err.message}`);
+      } else {
+        setError("Failed to load transactions. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -55,7 +79,20 @@ export default function TransactionList() {
   };
 
   if (loading) return <div className="text-center mt-8">Loading transactions...</div>;
-  if (error) return <div className="text-red-500 text-center mt-8">{error}</div>;
+  if (error) return (
+    <div className="text-center mt-8">
+      <div className="text-red-500 mb-4">{error}</div>
+      <button
+        onClick={loadTransactions}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        Retry
+      </button>
+    </div>
+  );
+  
+  // Ensure transactions is always an array
+  const transactionsArray = Array.isArray(transactions) ? transactions : [];
 
   return (
     <div className="max-w-6xl mx-auto mt-8 p-6">
@@ -128,7 +165,20 @@ export default function TransactionList() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {transactions.map((transaction) => (
+            {transactionsArray.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
+                  <div className="flex flex-col items-center">
+                    <svg className="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-lg font-medium">No transactions found</p>
+                    <p className="text-sm">Try adjusting your filters or create a new transaction.</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              transactionsArray.map((transaction) => (
               <tr key={transaction.transaction_id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
@@ -180,7 +230,8 @@ export default function TransactionList() {
                   </div>
                 </td>
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
       </div>
