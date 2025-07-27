@@ -1,8 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView, TokenRefreshView
+)
 from .views import (
     ProductMasterViewSet, StockMainViewSet, StockDetailViewSet,
-    InventorySummaryView, DashboardStatsView
+    InventorySummaryView, DashboardStatsView, RegisterView
 )
 
 # Create router for ViewSets
@@ -12,6 +15,11 @@ router.register(r'transactions', StockMainViewSet)
 router.register(r'stock-details', StockDetailViewSet)
 
 urlpatterns = [
+    # JWT Auth endpoints
+    path('auth/register/', RegisterView.as_view(), name='auth_register'),
+    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
     # Include router URLs
     path('', include(router.urls)),
     

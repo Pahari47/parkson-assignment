@@ -6,6 +6,11 @@ from django.db.models import Sum, Q, F
 from django.utils import timezone
 from datetime import datetime, timedelta
 from decimal import Decimal
+from django.contrib.auth.models import User
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.serializers import ModelSerializer, EmailField, CharField, ValidationError
 
 from .models import ProductMaster, StockMain, StockDetail
 from .serializers import (
@@ -272,3 +277,39 @@ class DashboardStatsView(generics.GenericAPIView):
                 {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class RegisterSerializer(ModelSerializer):
+    email = EmailField(required=True)
+    password = CharField(write_only=True, min_length=8)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password')
+
+    def validate_email(self, value):
+        if not value.endswith('@gmail.com'):
+            raise ValidationError('Only Gmail addresses are allowed.')
+        if User.objects.filter(email=value).exists():
+            raise ValidationError('A user with this email already exists.')
+        return value
+
+    def create(self, validated_data):
+        username = validated_data['email']
+        user = User.objects.create_user(
+            username=username,
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
+        return user
+
+class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({'message': 'User registered successfully.'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
