@@ -9,7 +9,7 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "@vite_api_url",
+    "VITE_API_URL": "https://parkson-assignment.onrender.com",
     "VITE_ENV": "production"
   }
 } 
