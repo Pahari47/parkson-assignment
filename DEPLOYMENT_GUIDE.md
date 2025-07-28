@@ -21,8 +21,8 @@ Make sure your backend code is pushed to a Git repository (GitHub, GitLab, etc.)
    - **Name**: `warehouse-inventory-backend` (or your preferred name)
    - **Environment**: `Python 3`
    - **Build Command**: `./build.sh`
-   - **Start Command**: `gunicorn warehouse_inventory.wsgi:app --bind 0.0.0.0:$PORT`
-   - **Root Directory**: `backend` (if your backend is in a subdirectory)
+   - **Start Command**: `./start.sh`
+   - **Root Directory**: Leave empty (use root directory)
 
 4. **Environment Variables**:
    Add these environment variables in Render dashboard:
