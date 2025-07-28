@@ -19,7 +19,7 @@ Make sure your backend code is pushed to a Git repository (GitHub, GitLab, etc.)
 
 3. **Configure the Web Service**:
    - **Name**: `warehouse-inventory-backend` (or your preferred name)
-   - **Environment**: `Python 3`
+   - **Environment**: `Python 3.11`
    - **Build Command**: `./build.sh`
    - **Start Command**: `./start.sh`
    - **Root Directory**: Leave empty (use root directory)

@@ -5,7 +5,8 @@ set -o errexit
 # Navigate to backend directory
 cd backend
 
-# Install dependencies
+# Install Python dependencies
+pip install --upgrade pip
 pip install -r requirements.txt
 
 # Collect static files
