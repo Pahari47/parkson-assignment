@@ -11,14 +11,8 @@ export async function apiFetch(endpoint, options = {}) {
     ...options.headers,
   };
   
-  const fullUrl = getApiUrl(endpoint);
-  console.log('API Fetch:', fullUrl, { ...options, headers });
-  
-      try {
-      const res = await fetch(fullUrl, { ...options, headers });
-      
-      console.log('API Response Status:', res.status, res.statusText);
-      console.log('API Response Headers:', Object.fromEntries(res.headers.entries()));
+    try {
+    const res = await fetch(getApiUrl(endpoint), { ...options, headers });
       
       // If token is expired, try to refresh it
       if (res.status === 401 && token) {
@@ -36,9 +30,7 @@ export async function apiFetch(endpoint, options = {}) {
                   const error = await retryRes.json().catch(() => ({}));
                   throw error;
                 }
-                const retryData = await retryRes.json();
-                console.log('API Retry Response Data:', retryData);
-                return retryData;
+                return retryRes.json();
       }
     }
     
@@ -46,9 +38,7 @@ export async function apiFetch(endpoint, options = {}) {
                   const error = await res.json().catch(() => ({}));
                   throw error;
                 }
-                const data = await res.json();
-                console.log('API Response Data:', data);
-                return data;
+                return res.json();
   } catch (error) {
     throw error;
   }

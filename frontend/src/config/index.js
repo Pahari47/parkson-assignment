@@ -28,18 +28,9 @@ export const config = {
   }
 };
 
-// Debug logging
-console.log('Config loaded:', {
-  API_URL: config.API_URL,
-  ENV: config.ENV,
-  VITE_API_URL: import.meta.env.VITE_API_URL
-});
-
 // Helper function to get full API URL
 export const getApiUrl = (endpoint = "") => {
-  const fullUrl = `${config.API_URL}${endpoint}`;
-  console.log('getApiUrl called with endpoint:', endpoint, 'fullUrl:', fullUrl);
-  return fullUrl;
+  return `${config.API_URL}${endpoint}`;
 };
 
 // Helper function to check if we're in development

@@ -22,7 +22,7 @@ export default function ProductList() {
       setError("");
       const data = await getProducts(filters);
       
-      console.log('ProductList received data:', data);
+
       
       // Ensure data is an array
       if (Array.isArray(data)) {

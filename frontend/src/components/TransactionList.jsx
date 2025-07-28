@@ -22,7 +22,7 @@ export default function TransactionList() {
       setError("");
       const data = await getTransactions(filters);
       
-      console.log('TransactionList received data:', data);
+
       
       // Ensure data is an array
       if (Array.isArray(data)) {

@@ -11,14 +11,7 @@ export async function getProducts(params = {}) {
   const queryString = queryParams.toString();
   const endpoint = queryString ? `${config.ENDPOINTS.PRODUCTS}?${queryString}` : config.ENDPOINTS.PRODUCTS;
   
-  try {
-    const data = await apiFetch(endpoint);
-    console.log('Products API response:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    throw error;
-  }
+  return apiFetch(endpoint);
 }
 
 export async function getProduct(id) {
@@ -43,17 +36,4 @@ export async function deleteProduct(id) {
   return apiFetch(`${config.ENDPOINTS.PRODUCTS}${id}/`, {
     method: 'DELETE',
   });
-}
-
-export async function getProductStockMovements(id, params = {}) {
-  const queryParams = new URLSearchParams();
-  if (params.start_date) queryParams.append('start_date', params.start_date);
-  if (params.end_date) queryParams.append('end_date', params.end_date);
-  
-  const queryString = queryParams.toString();
-  const endpoint = queryString 
-    ? `${config.ENDPOINTS.PRODUCTS}${id}/stock_movements/?${queryString}` 
-    : `${config.ENDPOINTS.PRODUCTS}${id}/stock_movements/`;
-  
-  return apiFetch(endpoint);
 } 

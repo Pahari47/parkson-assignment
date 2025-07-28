@@ -12,14 +12,7 @@ export async function getInventorySummary(params = {}) {
   const queryString = queryParams.toString();
   const endpoint = queryString ? `${config.ENDPOINTS.INVENTORY_SUMMARY}?${queryString}` : config.ENDPOINTS.INVENTORY_SUMMARY;
   
-  try {
-    const data = await apiFetch(endpoint);
-    console.log('Inventory API response:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching inventory:', error);
-    throw error;
-  }
+  return apiFetch(endpoint);
 }
 
 export async function getDashboardStats() {

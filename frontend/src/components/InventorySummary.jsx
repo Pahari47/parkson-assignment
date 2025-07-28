@@ -23,7 +23,7 @@ export default function InventorySummary() {
       setError("");
       const data = await getInventorySummary(filters);
       
-      console.log('InventorySummary received data:', data);
+
       
       // Ensure data is an array
       if (Array.isArray(data)) {

@@ -39,7 +39,7 @@ export default function TransactionForm() {
       setProductsLoading(true);
       const data = await getProducts({ is_active: true });
       
-      console.log('TransactionForm received products data:', data);
+
       
       // Ensure data is an array
       if (Array.isArray(data)) {
