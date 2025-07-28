@@ -16,10 +16,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.documentation import include_docs_urls
+from decouple import config
+
+# Import coreapi for documentation
+try:
+    import coreapi
+    from rest_framework.documentation import include_docs_urls
+    HAS_COREAPI = True
+except ImportError:
+    HAS_COREAPI = False
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('inventory.urls')),
-    path('api/docs/', include_docs_urls(title='Warehouse Inventory API')),
 ]
+
+# Only include docs if coreapi is available and not in production
+if HAS_COREAPI and config('DEBUG', default=True, cast=bool):
+    urlpatterns.append(path('api/docs/', include_docs_urls(title='Warehouse Inventory API')))

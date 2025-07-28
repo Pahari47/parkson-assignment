@@ -1,4 +1,5 @@
 from django.urls import path, include
+from django.http import JsonResponse
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView, TokenRefreshView
@@ -8,6 +9,9 @@ from .views import (
     InventorySummaryView, DashboardStatsView, RegisterView
 )
 
+def health_check(request):
+    return JsonResponse({'status': 'healthy', 'message': 'API is running'})
+
 # Create router for ViewSets
 router = DefaultRouter()
 router.register(r'products', ProductMasterViewSet)
@@ -15,6 +19,9 @@ router.register(r'transactions', StockMainViewSet)
 router.register(r'stock-details', StockDetailViewSet)
 
 urlpatterns = [
+    # Health check endpoint
+    path('health/', health_check, name='health_check'),
+    
     # JWT Auth endpoints
     path('auth/register/', RegisterView.as_view(), name='auth_register'),
     path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
